@@ -1,9 +1,64 @@
-# the the name of the file is good
+import { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 
-# this is read file
+function RowWithMenu(props) {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [menuPosition, setMenuPosition] = useState({ x: 0, y: 0 });
+  const menuRef = useRef(null);
 
-i am very good boy
+  useEffect(() => {
+    const handleClick = (e) => {
+      if (menuRef.current && !menuRef.current.contains(e.target)) {
+        setMenuOpen(false);
+      }
+    };
 
-Do the thing here 
+    document.addEventListener('mousedown', handleClick);
 
- and i am very good boy
+    return () => {
+      document.removeEventListener('mousedown', handleClick);
+    };
+  }, [menuRef]);
+
+  const handleContextMenu = (e) => {
+    e.preventDefault();
+    setMenuOpen(true);
+    setMenuPosition({ x: e.clientX, y: e.clientY });
+  };
+
+  const handleCloseMenu = () => {
+    setMenuOpen(false);
+  };
+
+  const handleMenuSelect = (menuItem) => {
+    console.log(`Selected menu item: ${menuItem}`);
+    setMenuOpen(false);
+  };
+
+  return (
+    <div className="row-with-menu">
+      <div onContextMenu={handleContextMenu}>
+        {props.rowData.name}
+      </div>
+
+      {menuOpen && (
+        <div
+          className="context-menu"
+          ref={menuRef}
+          style={{
+            position: 'absolute',
+            top: menuPosition.y,
+            left: menuPosition.x,
+          }}
+        >
+          <ul>
+            <li onClick={() => handleMenuSelect('Edit')}>Edit</li>
+            <li onClick={() => handleMenuSelect('Delete')}>Delete</li>
+          </ul>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default RowWithMenu;
